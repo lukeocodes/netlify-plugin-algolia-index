@@ -6,9 +6,6 @@ const chalk = require('chalk')
 const makeDir = require('make-dir')
 const pathExists = require('path-exists')
 
-const cpy = require('copy-template-dir')
-const copy = promisify(cpy)
-const { zipFunctions } = require('@netlify/zip-it-and-ship-it') // eslint-disable-line
 const { parse } = require('./parser')
 
 const readFile = promisify(fs.readFile)
@@ -16,12 +13,11 @@ const writeFile = promisify(fs.writeFile)
 
 function netlifyPluginSearchIndex(_) {
   return {
-    name: 'netlify-plugin-search-index',
+    name: 'netlify-plugin-algolia-index',
     async onPostBuild(opts) {
       const {
         pluginConfig: {
           exclude = [],
-          generatedFunctionName = 'search',
           publishDirJSONFileName = 'searchIndex',
           debugMode,
         },
@@ -29,9 +25,9 @@ function netlifyPluginSearchIndex(_) {
         utils: { build }
       } = opts
 
-      if (generatedFunctionName === null && publishDirJSONFileName === null) {
+      if (publishDirJSONFileName === null) {
         build.failPlugin(
-          'generatedFunctionName and publishDirJSONFileName cannot both be null, this plugin wouldnt be generating anything!'
+          'publishDirJSONFileName cannot be null, this plugin wouldn\'t generate anything!'
         )
       }
       if (debugMode) {
@@ -44,6 +40,9 @@ function netlifyPluginSearchIndex(_) {
       // https://www.npmjs.com/package/html-to-text#user-content-options
       await Promise.all(
         newManifest.map(async (htmlFilePath) => {
+
+          console.log(htmlFilePath)
+
           const htmlFileContent = await readFile(htmlFilePath, 'utf8')
           searchIndex.push(await parse(htmlFileContent, htmlFilePath, { BUILD_DIR }))
         })
@@ -74,43 +73,6 @@ function netlifyPluginSearchIndex(_) {
             `/${publishDirJSONFileName}.json`
           )}!`
         )
-      }
-      /**
-       *
-       * serverless function + json
-       *
-       */
-      if (generatedFunctionName) {
-        if (typeof FUNCTIONS_SRC === 'undefined') {
-          build.failPlugin('FUNCTIONS_SRC is undefined - did you forget to declare a functions folder in netlify.toml? https://github.com/sw-yx/netlify-plugin-search-index#usage')
-        }
-        const searchIndexFunctionPath = path.join(
-          FUNCTIONS_SRC,
-          generatedFunctionName
-        )
-        const vars = {
-          searchIndex: generatedFunctionName
-        }
-        await copy(
-          __dirname + '/functionTemplate',
-          searchIndexFunctionPath,
-          vars
-        )
-        // now we have copied it out to intermediate dir
-        // we may want to do some processing/templating
-        await writeFile(
-          path.join(searchIndexFunctionPath, 'searchIndex.json'),
-          stringifiedIndex
-        )
-        // and then..
-        // we still need to zip this to dist because netlify build doesnt recognize generated functions
-        await zipFunctions(FUNCTIONS_SRC, FUNCTIONS_DIST)
-        console.log(
-          `Netlify Function generated at ${chalk.cyan(
-            `/.netlify/functions/${generatedFunctionName}`
-          )}!`
-        )
-        // done with generating functions
       }
     }
   }
