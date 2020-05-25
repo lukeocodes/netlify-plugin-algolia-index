@@ -28,6 +28,7 @@
     "unist-util-visit": "^2.0.2",
     "vfile": "^4.1.0"
   },
+  "publishConfig": { "registry": "https://npm.pkg.github.com/" },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/lukeocodes/netlify-plugin-algolia-index.git"
