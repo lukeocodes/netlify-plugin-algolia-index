@@ -40,9 +40,6 @@ function netlifyPluginSearchIndex(_) {
       // https://www.npmjs.com/package/html-to-text#user-content-options
       await Promise.all(
         newManifest.map(async (htmlFilePath) => {
-
-          console.log(htmlFilePath)
-
           const htmlFileContent = await readFile(htmlFilePath, 'utf8')
           searchIndex.push(await parse(htmlFileContent, htmlFilePath, { BUILD_DIR }))
         })
