@@ -46,7 +46,6 @@ async function parse(contents, pathToFile, { BUILD_DIR }) {
 
   return {
     text,
-    path: path.parse(path.relative(BUILD_DIR, pathToFile)).name,
     from: pathToFile.slice(BUILD_DIR.length + 1).split('/').slice(0, -1),
     ...Object.entries(data).reduce((acc, [k, v]) => ({
       ...acc,
