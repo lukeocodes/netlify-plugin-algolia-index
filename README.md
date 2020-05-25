@@ -6,8 +6,8 @@ Generate a Search Index you can export to Algolia!
 
 ## Demo
 
-- Demo site: https://netlify-plugin-search-index.netlify.app
-- Demo JSON blob: https://netlify-plugin-search-index.netlify.app/searchIndex.json
+- Demo site: https://netlify-plugin-algolia-index.netlify.app
+- Demo JSON blob: https://netlify-plugin-algolia-index.netlify.app/searchIndex.json
 
 ## Usage
 
@@ -36,7 +36,7 @@ Your project probably contains some content files that you don't want your users
 
 ```yml
 [[plugins]]
-  package = netlify-plugin-search-index
+  package = netlify-plugin-algolia-index
     [plugins.inputs]
       exclude = ['/admin', '/404.html']
 ```
