@@ -14,7 +14,7 @@ const writeFile = promisify(fs.writeFile)
 module.exports = {
   async onPostBuild(opts) {
     const {
-      pluginConfig: {
+      inputs: {
         exclude = [],
         publishDirJSONFileName = 'searchIndex',
         debugMode,
