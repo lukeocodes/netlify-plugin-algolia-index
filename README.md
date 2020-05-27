@@ -13,9 +13,6 @@ Generate a Search Index you can export to Algolia!
 
 To install, add the plugin in your `netlify.toml`. No config is required but we show the default options here.
 
-<details>
-<summary><b>Generating the search index file.</b></summary>
-
 ```toml
 [[plugins]]
   package = netlify-plugin-algolia-index
@@ -24,7 +21,6 @@ To install, add the plugin in your `netlify.toml`. No config is required but we 
       # exclude = [] # don't index this file
       # indexName = searchIndex
 ```
-</details>
 
 Default config will exclude nothing and generate a JSON file at `https://yoursite.netlify.com/searchIndex.json`
 
