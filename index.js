@@ -16,16 +16,16 @@ module.exports = {
     const {
       inputs: {
         exclude = [],
-        publishDirJSONFileName = 'searchIndex',
+        indexName = 'searchIndex',
         debugMode,
       },
       constants: { PUBLISH_DIR, FUNCTIONS_SRC, FUNCTIONS_DIST },
       utils: { build }
     } = opts
 
-    if (publishDirJSONFileName === null) {
+    if (indexName === null) {
       build.failPlugin(
-        'publishDirJSONFileName cannot be null, this plugin wouldn\'t generate anything!'
+        'indexName cannot be null, this plugin wouldn\'t generate anything!'
       )
     }
     if (debugMode) {
@@ -50,10 +50,10 @@ module.exports = {
      * clientside JSON
      *
      */
-    if (publishDirJSONFileName) {
+    if (indexName) {
       let searchIndexPath = path.join(
         PUBLISH_DIR,
-        publishDirJSONFileName + '.json'
+        indexName + '.json'
       )
       if (await pathExists(searchIndexPath)) {
         console.warn(
@@ -65,7 +65,7 @@ module.exports = {
       await writeFile(searchIndexPath, stringifiedIndex)
       console.log(
         `Search Index JSON generated at ${chalk.cyan(
-          `/${publishDirJSONFileName}.json`
+          `/${indexName}.json`
         )}!`
       )
     }

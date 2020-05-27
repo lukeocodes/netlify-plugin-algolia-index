@@ -22,7 +22,7 @@ To install, add the plugin in your `netlify.toml`. No config is required but we 
     # all inputs is optional, we just show you the defaults below
     # [plugins.inputs]
       # exclude = [] # don't index this file
-      # publishDirJSONFileName = searchIndex
+      # indexName = searchIndex
 ```
 </details>
 

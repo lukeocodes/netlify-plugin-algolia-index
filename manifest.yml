@@ -1,6 +1,6 @@
 name: netlify-plugin-algolia-index
 
 inputs:
-  - name: publishDirJSONFileName
+  - name: indexName
   - name: exclude
   - name: debugMode
