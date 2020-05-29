@@ -23,6 +23,7 @@
     "patch-package": "^6.2.1",
     "path-exists": "^4.0.0",
     "rehype-parse": "^6.0.2",
+    "stopword": "^1.0.1",
     "unified": "^9.0.0",
     "unist-util-remove": "^2.0.0",
     "unist-util-visit": "^2.0.2",

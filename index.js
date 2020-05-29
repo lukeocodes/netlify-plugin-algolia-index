@@ -15,11 +15,17 @@ module.exports = {
   async onPostBuild(opts) {
     const {
       inputs: {
+        // custom stopwords to remove from text body, removed before textLength limit applied
+        stopwords = [],
+        // leave space for keywords and meta - algolia has a 10k byte limit per object
+        textLength = 7000,
+        // paths to exclude from glob before parse
         exclude = [],
+        // output filename
         indexName = 'searchIndex',
         debugMode,
       },
-      constants: { PUBLISH_DIR, FUNCTIONS_SRC, FUNCTIONS_DIST },
+      constants: { PUBLISH_DIR },
       utils: { build }
     } = opts
 
@@ -39,7 +45,7 @@ module.exports = {
     await Promise.all(
       newManifest.map(async (htmlFilePath) => {
         const htmlFileContent = await readFile(htmlFilePath, 'utf8')
-        searchIndex.push(await parse(htmlFileContent, htmlFilePath, { PUBLISH_DIR }))
+        searchIndex.push(await parse(htmlFileContent, htmlFilePath, { PUBLISH_DIR, textLength, stopwords }))
       })
     )
 

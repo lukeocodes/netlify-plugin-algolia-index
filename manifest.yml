@@ -3,4 +3,6 @@ name: netlify-plugin-algolia-index
 inputs:
   - name: indexName
   - name: exclude
+  - name: textLength
+  - name: stopwords
   - name: debugMode

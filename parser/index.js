@@ -1,7 +1,6 @@
-const path = require('path')
 const vfile = require('vfile')
 const unified = require('unified')
-
+const stopword = require('stopword')
 const parseH = require('rehype-parse')
 
 const toNlcst = require('hast-util-to-nlcst')
@@ -41,12 +40,18 @@ const processor = unified()
   .use(extractMeta)
   .use(naturalize)
 
-async function parse(contents, pathToFile, { PUBLISH_DIR }) {
+async function parse(contents, pathToFile, { PUBLISH_DIR, textLength, stopwords }) {
   const { data, contents: text } = await processor.process(vfile({ contents }))
+  const from = pathToFile.slice(PUBLISH_DIR.length + 1).split('/').slice(0, -1)
 
   return {
-    text,
-    from: pathToFile.slice(PUBLISH_DIR.length + 1).split('/').slice(0, -1),
+    objectID: from.join('/'),
+    text: stopword
+      .removeStopwords(text.replace(/(\\n|\W)+/, ' ').trim().split(/\W+/), stopwords)
+      .join(' ')
+      .substring(0, textLength),
+    from: from,
+    path: from.join('/'),
     ...Object.entries(data).reduce((acc, [k, v]) => ({
       ...acc,
       ...(indexKeys.indexOf(k) !== -1 ? {
