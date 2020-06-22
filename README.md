@@ -1,10 +1,6 @@
 # Netlify Algolia Index Plugin
 
-> Based on the [Netlify Search Index Plugin](https://github.com/sw-yx/netlify-plugin-search-index) by [swyx](https://github.com/sw-yx), this simplifies and changes the format of the output for parsing by Algolia.
-
-Generate a Search Index you can export to Algolia!
-
-# Proposed v1 includes breaking changes since first v0 release
+Export your search index straight to Algolia!
 
 ## Demo
 
@@ -16,7 +12,7 @@ To install, add the plugin in your `netlify.toml`. No config is required but we 
 
 ```toml
 [[plugins]]
-  package = netlify-plugin-algolia-index
+  package = "netlify-plugin-algolia-index"
     # all inputs is optional, we just show you the defaults below
     # [plugins.inputs]
       # exclude = [] # don't index this file
@@ -40,7 +36,7 @@ Your project probably contains some content files that you don't want your users
 
 ```toml
 [[plugins]]
-  package = netlify-plugin-algolia-index
+  package = "netlify-plugin-algolia-index"
     [plugins.inputs]
       exclude = ['''^\/admin.*''', '''^\/search.*''', '/404.html']
 ```
@@ -55,3 +51,7 @@ Advanced Regex Alert! This will exclude all files that DON'T match the regex for
     [plugins.inputs]
       exclude = ['''^\/(?!blog\/[0-9]{4}\/[0-9]{2}\/[0-9]{2}\/(?!index.html)).*''']
 ```
+
+## Credit
+
+Based on the [Netlify Search Index Plugin](https://github.com/sw-yx/netlify-plugin-search-index) by [swyx](https://github.com/sw-yx) for fetching and parsing the content into something we can index.
