@@ -2,14 +2,16 @@ const path = require('path')
 const fs = require('fs')
 const globby = require('globby')
 const { promisify } = require('util')
-const chalk = require('chalk')
-const makeDir = require('make-dir')
-const pathExists = require('path-exists')
-
 const { parse } = require('./parser')
+const { exporter } = require('./exporter')
+
+const {
+  ALGOLIA_APPLICATION_ID: algoliaAppId,
+  AlGOLIA_ADMIN_KEY: algoliaAdminKey,
+  ALGOLIA_INDEX: algoliaIndex
+} = process.env
 
 const readFile = promisify(fs.readFile)
-const writeFile = promisify(fs.writeFile)
 
 module.exports = {
   async onPostBuild(opts) {
@@ -22,18 +24,20 @@ module.exports = {
         // paths to exclude from glob before parse
         exclude = [],
         // output filename
-        indexName = 'searchIndex',
         debugMode,
       },
       constants: { PUBLISH_DIR },
       utils: { build }
     } = opts
 
-    if (indexName === null) {
+    if (algoliaAppId === null ||
+      algoliaAdminKey === null ||
+      algoliaIndex === null) {
       build.failPlugin(
-        'indexName cannot be null, this plugin wouldn\'t generate anything!'
+        'Please set your ALGOLIA_APPLICATION_ID, AlGOLIA_ADMIN_KEY, and ALGOLIA_INDEX using environment variables: https://docs.netlify.com/configure-builds/environment-variables'
       )
     }
+
     if (debugMode) {
       console.warn('debugMode is not implemented yet for this plugin')
     }
@@ -41,7 +45,6 @@ module.exports = {
     let searchIndex = []
     const newManifest = await walk(PUBLISH_DIR, exclude)
 
-    // https://www.npmjs.com/package/html-to-text#user-content-options
     await Promise.all(
       newManifest.map(async (htmlFilePath) => {
         const htmlFileContent = await readFile(htmlFilePath, 'utf8')
@@ -49,32 +52,10 @@ module.exports = {
       })
     )
 
-    let stringifiedIndex = JSON.stringify(searchIndex)
+    // export content to algolia
+    await exporter(searchIndex)
 
-    /**
-     *
-     * clientside JSON
-     *
-     */
-    if (indexName) {
-      let searchIndexPath = path.join(
-        PUBLISH_DIR,
-        indexName + '.json'
-      )
-      if (await pathExists(searchIndexPath)) {
-        console.warn(
-          `Existing file at ${searchIndexPath}, plugin will overwrite it but this may indicate an accidental conflict. Delete this file from your repo to avoid confusion - the plugin should be the sole manager of your search index`
-        )
-        // to do: let people turn off this warning?
-      }
-      await makeDir(`${searchIndexPath}/..`) // make a dir out of the parent
-      await writeFile(searchIndexPath, stringifiedIndex)
-      console.log(
-        `Search Index JSON generated at ${chalk.cyan(
-          `/${indexName}.json`
-        )}!`
-      )
-    }
+    console.info(`Export to Algolia app ${algoliaAppId}/${algoliaIndex} has successfully completed`)
   }
 }
 
