@@ -14,6 +14,7 @@
   "license": "MIT",
   "dependencies": {
     "algoliasearch": "^4.3.0",
+    "chalk": "^4.1.0",
     "globby": "^11.0.0",
     "hast-util-is-element": "^1.0.4",
     "hast-util-to-nlcst": "^1.2.7",
