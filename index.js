@@ -64,9 +64,8 @@ module.exports = {
       const index = client.initIndex(algoliaIndex)
       await exporter(index, newIndex)
     } catch (error) {
-      console.error(error)
       // Not exporting to search index doesn't fail the entire build
-      build.failPlugin(`Export to Algolia failed - "${error.message}"`)
+      build.failPlugin('Export to Algolia failed', { error })
     }
 
     console.info(`${chalk.green(
