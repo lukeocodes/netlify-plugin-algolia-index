@@ -12,29 +12,48 @@ const chunk = (array, size) => {
   return tempArray
 }
 
-async function asyncForEach(array, callback) {
+const asyncForEach = async (array, callback) => {
   for (let index = 0; index < array.length; index++) {
     await callback(array[index], index, array)
   }
 }
 
 const exporter = async (index, newIndex) => {
-  const indexChunks = chunk(newIndex, 50)
+  const objectChunks = chunk(newIndex, 50)
+  const exports = []
 
-  await asyncForEach(indexChunks, async chunk => {
-    await index
-      .saveObjects(chunk)
-      .then(({ objectIDs }) => {
-        objectIDs.forEach(objectID => {
-          console.info(`${chalk.green(
-            '@netlify/plugin-algolia-index:'
-          )} indexing ${chalk.cyan(objectID + '/')}`)
-        });
-      })
-      .catch(error => {
-        throw error
-      })
+  objectChunks.forEach(objects => {
+    exports.push(saveObjects(index, objects))
   })
+
+  // await asyncForEach(objectChunks, objects => {
+  //   exports.push(saveObjects(index, objects))
+  // })
+
+  await Promise.all(exports)
+    .then(results => {
+      console.info(`${chalk.green(
+        '@netlify/plugin-algolia-index:'
+      )} made ${chalk.cyan(results.length)} requests to Algolia`)
+    })
+    .catch(error => {
+      throw error
+    })
+}
+
+const saveObjects = (index, objects) => {
+  return index
+    .saveObjects(objects)
+    .then(({ objectIDs }) => {
+      objectIDs.forEach(objectID => {
+        console.info(`${chalk.green(
+          '@netlify/plugin-algolia-index:'
+        )} indexing ${chalk.cyan(objectID + '/')}`)
+      });
+    })
+    .catch(error => {
+      throw error
+    })
 }
 
 module.exports = {
