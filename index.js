@@ -1,17 +1,18 @@
-const path = require('path')
+const { exporter } = require('./exporter')
+const { parse } = require('./parser')
+const { promisify } = require('util')
+const algoliasearch = require('algoliasearch')
+const chalk = require('chalk')
 const fs = require('fs')
 const globby = require('globby')
-const { promisify } = require('util')
-const { parse } = require('./parser')
-const { exporter } = require('./exporter')
+const path = require('path')
+const readFile = promisify(fs.readFile)
 
 const {
   ALGOLIA_APPLICATION_ID: algoliaAppId,
   AlGOLIA_ADMIN_KEY: algoliaAdminKey,
   ALGOLIA_INDEX: algoliaIndex
 } = process.env
-
-const readFile = promisify(fs.readFile)
 
 module.exports = {
   async onPostBuild(opts) {
@@ -30,6 +31,7 @@ module.exports = {
       utils: { build }
     } = opts
 
+    // Check environment variables have been set
     if (algoliaAppId === null ||
       algoliaAdminKey === null ||
       algoliaIndex === null) {
@@ -39,23 +41,37 @@ module.exports = {
     }
 
     if (debugMode) {
-      console.warn('debugMode is not implemented yet for this plugin')
+      console.warn(`${chalk.yellow(
+        '@netlify/plugin-algolia-index:'
+      )} ${chalk.blueBright('debugMode')} is not implemented yet for this plugin`)
     }
 
-    let searchIndex = []
+    // Walk publish directory for files to parse
     const newManifest = await walk(PUBLISH_DIR, exclude)
 
+    // Parse all files for their indexable content
+    let newIndex = []
     await Promise.all(
       newManifest.map(async (htmlFilePath) => {
         const htmlFileContent = await readFile(htmlFilePath, 'utf8')
-        searchIndex.push(await parse(htmlFileContent, htmlFilePath, { PUBLISH_DIR, textLength, stopwords }))
+        newIndex.push(await parse(htmlFileContent, htmlFilePath, { PUBLISH_DIR, textLength, stopwords }))
       })
     )
 
-    // export content to algolia
-    await exporter(searchIndex)
+    // Export content to Algolia
+    try {
+      const client = algoliasearch(algoliaAppId, algoliaAdminKey)
+      const index = client.initIndex(algoliaIndex)
+      await exporter(index, newIndex)
+    } catch (error) {
+      console.error(error)
+      // Not exporting to search index doesn't fail the entire build
+      build.failPlugin(`Export to Algolia failed - "${error.message}"`)
+    }
 
-    console.info(`Export to Algolia app ${algoliaAppId}/${algoliaIndex} has successfully completed`)
+    console.info(`${chalk.green(
+      '@netlify/plugin-algolia-index:'
+    )} Export to Algolia app ${chalk.cyan(algoliaAppId)}/${chalk.cyan(algoliaIndex)} finished`)
   }
 }
 

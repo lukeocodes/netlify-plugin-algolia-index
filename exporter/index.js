@@ -1,12 +1,4 @@
-const {
-  ALGOLIA_APPLICATION_ID: algoliaAppId,
-  AlGOLIA_ADMIN_KEY: algoliaAdminKey,
-  ALGOLIA_INDEX: algoliaIndex
-} = process.env
-
-const algoliasearch = require("algoliasearch")
-const client = algoliasearch(algoliaAppId, algoliaAdminKey)
-const index = client.initIndex(algoliaIndex)
+const chalk = require('chalk')
 
 const chunk = (array, size) => {
   var index = 0
@@ -26,18 +18,21 @@ async function asyncForEach(array, callback) {
   }
 }
 
-const exporter = async (searchIndex) => {
-  const chunks = chunk(searchIndex, 50)
+const exporter = async (index, newIndex) => {
+  const indexChunks = chunk(newIndex, 50)
 
-  console.info('Exporting the following pages to the index')
-  await asyncForEach(chunks, async chunk => {
+  await asyncForEach(indexChunks, async chunk => {
     await index
       .saveObjects(chunk)
       .then(({ objectIDs }) => {
-        console.info(objectIDs)
+        objectIDs.forEach(objectID => {
+          console.info(`${chalk.green(
+            '@netlify/plugin-algolia-index:'
+          )} indexing ${chalk.cyan(objectID + '/')}`)
+        });
       })
-      .catch(err => {
-        console.error(err)
+      .catch(error => {
+        throw error
       })
   })
 }
