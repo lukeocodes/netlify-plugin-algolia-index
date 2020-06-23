@@ -70,7 +70,7 @@ module.exports = {
 
     console.info(`${chalk.green(
       '@netlify/plugin-algolia-index:'
-    )} Export to Algolia app ${chalk.cyan(algoliaAppId)}/${chalk.cyan(algoliaIndex)} finished`)
+    )} export to ${chalk.cyan(algoliaAppId)}/${chalk.cyan(algoliaIndex)} finished`)
   }
 }
 
