@@ -12,12 +12,6 @@ const chunk = (array, size) => {
   return tempArray
 }
 
-const asyncForEach = async (array, callback) => {
-  for (let index = 0; index < array.length; index++) {
-    await callback(array[index], index, array)
-  }
-}
-
 const exporter = async (index, newIndex) => {
   const objectChunks = chunk(newIndex, 50)
   const exports = []
@@ -25,10 +19,6 @@ const exporter = async (index, newIndex) => {
   objectChunks.forEach(objects => {
     exports.push(saveObjects(index, objects))
   })
-
-  // await asyncForEach(objectChunks, objects => {
-  //   exports.push(saveObjects(index, objects))
-  // })
 
   await Promise.all(exports)
     .then(results => {
