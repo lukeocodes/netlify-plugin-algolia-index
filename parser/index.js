@@ -43,15 +43,16 @@ const processor = unified()
 async function parse(contents, pathToFile, { PUBLISH_DIR, textLength, stopwords }) {
   const { data, contents: text } = await processor.process(vfile({ contents }))
   const from = pathToFile.slice(PUBLISH_DIR.length + 1).split('/').slice(0, -1)
+  const path = `/${from.join('/')}`
 
   return {
-    objectID: from.join('/'),
+    objectID: path,
     text: stopword
       .removeStopwords(text.replace(/(\\n|\W)+/, ' ').trim().split(/\W+/), stopwords)
       .join(' ')
       .substring(0, textLength),
     from: from,
-    path: from.join('/'),
+    path: path,
     ...Object.entries(data).reduce((acc, [k, v]) => ({
       ...acc,
       ...(indexKeys.indexOf(k) !== -1 ? {
