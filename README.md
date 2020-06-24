@@ -1,3 +1,9 @@
+![](https://img.shields.io/badge/main-not%20master-green)
+![](https://img.shields.io/badge/made%20with-%E2%9D%A4-red)
+![](https://img.shields.io/npm/v/netlify-plugin-algolia-index)
+![](https://img.shields.io/github/contributors/lukeocodes/netlify-plugin-algolia-index)
+![](https://img.shields.io/github/issues/lukeocodes/netlify-plugin-algolia-index)
+
 # Netlify Algolia Index Plugin
 
 Export your search index straight to Algolia!
