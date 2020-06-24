@@ -33,12 +33,14 @@ const exporter = async (index, newIndex) => {
 
 const saveObjects = (index, objects) => {
   return index
-    .saveObjects(objects)
+    .saveObjects(objects, {
+      autoGenerateObjectIDIfNotExist: true
+    })
     .then(({ objectIDs }) => {
       objectIDs.forEach(objectID => {
         console.info(`${chalk.green(
           '@netlify/plugin-algolia-index:'
-        )} indexing ${chalk.cyan(objectID + '/')}`)
+        )} indexing ${chalk.cyan(objectID)}`)
       });
     })
     .catch(error => {
