@@ -1,15 +1,18 @@
-const path = require('path')
+const { exporter } = require('./exporter')
+const { parse } = require('./parser')
+const { promisify } = require('util')
+const algoliasearch = require('algoliasearch')
+const chalk = require('chalk')
 const fs = require('fs')
 const globby = require('globby')
-const { promisify } = require('util')
-const chalk = require('chalk')
-const makeDir = require('make-dir')
-const pathExists = require('path-exists')
-
-const { parse } = require('./parser')
-
+const path = require('path')
 const readFile = promisify(fs.readFile)
-const writeFile = promisify(fs.writeFile)
+
+const {
+  ALGOLIA_APPLICATION_ID: algoliaAppId,
+  AlGOLIA_ADMIN_KEY: algoliaAdminKey,
+  ALGOLIA_INDEX: algoliaIndex
+} = process.env
 
 module.exports = {
   async onPostBuild(opts) {
@@ -22,59 +25,52 @@ module.exports = {
         // paths to exclude from glob before parse
         exclude = [],
         // output filename
-        indexName = 'searchIndex',
         debugMode,
       },
       constants: { PUBLISH_DIR },
       utils: { build }
     } = opts
 
-    if (indexName === null) {
+    // Check environment variables have been set
+    if (algoliaAppId === null ||
+      algoliaAdminKey === null ||
+      algoliaIndex === null) {
       build.failPlugin(
-        'indexName cannot be null, this plugin wouldn\'t generate anything!'
+        'Please set your ALGOLIA_APPLICATION_ID, AlGOLIA_ADMIN_KEY, and ALGOLIA_INDEX using environment variables: https://docs.netlify.com/configure-builds/environment-variables'
       )
     }
+
     if (debugMode) {
-      console.warn('debugMode is not implemented yet for this plugin')
+      console.warn(`${chalk.yellow(
+        '@netlify/plugin-algolia-index:'
+      )} ${chalk.blueBright('debugMode')} is not implemented yet for this plugin`)
     }
 
-    let searchIndex = []
+    // Walk publish directory for files to parse
     const newManifest = await walk(PUBLISH_DIR, exclude)
 
-    // https://www.npmjs.com/package/html-to-text#user-content-options
+    // Parse all files for their indexable content
+    let newIndex = []
     await Promise.all(
       newManifest.map(async (htmlFilePath) => {
         const htmlFileContent = await readFile(htmlFilePath, 'utf8')
-        searchIndex.push(await parse(htmlFileContent, htmlFilePath, { PUBLISH_DIR, textLength, stopwords }))
+        newIndex.push(await parse(htmlFileContent, htmlFilePath, { PUBLISH_DIR, textLength, stopwords }))
       })
     )
 
-    let stringifiedIndex = JSON.stringify(searchIndex)
-
-    /**
-     *
-     * clientside JSON
-     *
-     */
-    if (indexName) {
-      let searchIndexPath = path.join(
-        PUBLISH_DIR,
-        indexName + '.json'
-      )
-      if (await pathExists(searchIndexPath)) {
-        console.warn(
-          `Existing file at ${searchIndexPath}, plugin will overwrite it but this may indicate an accidental conflict. Delete this file from your repo to avoid confusion - the plugin should be the sole manager of your search index`
-        )
-        // to do: let people turn off this warning?
-      }
-      await makeDir(`${searchIndexPath}/..`) // make a dir out of the parent
-      await writeFile(searchIndexPath, stringifiedIndex)
-      console.log(
-        `Search Index JSON generated at ${chalk.cyan(
-          `/${indexName}.json`
-        )}!`
-      )
+    // Export content to Algolia
+    try {
+      const client = algoliasearch(algoliaAppId, algoliaAdminKey)
+      const index = client.initIndex(algoliaIndex)
+      await exporter(index, newIndex)
+    } catch (error) {
+      // Not exporting to search index doesn't fail the entire build
+      build.failPlugin('Export to Algolia failed', { error })
     }
+
+    console.info(`${chalk.green(
+      '@netlify/plugin-algolia-index:'
+    )} export to ${chalk.cyan(algoliaAppId)}/${chalk.cyan(algoliaIndex)} finished`)
   }
 }
 
