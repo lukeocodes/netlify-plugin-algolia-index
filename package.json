@@ -1,7 +1,7 @@
 {
   "name": "netlify-plugin-algolia-index",
   "version": "1.0.5",
-  "description": "Generate and export a search index to Algolia",
+  "description": "Netlify plugin to build a Algolia search index file to import manually",
   "main": "index.js",
   "keywords": [
     "netlify",
