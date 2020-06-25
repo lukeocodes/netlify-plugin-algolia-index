@@ -4,7 +4,7 @@
 ![](https://img.shields.io/github/contributors/lukeocodes/netlify-plugin-algolia-index)
 ![](https://img.shields.io/github/issues/lukeocodes/netlify-plugin-algolia-index)
 
-# Netlify Algolia Index Plugin [No Longer Maintained]
+# Netlify Algolia Index Plugin
 
 Netlify plugin to build a Algolia search index file to import manually. This package is no longer maintained, instead replaced by [netlify-plugin-algolia-export](https://github.com/lukeocodes/netlify-plugin-algolia-export) which exports directly to Algolia.
 
