@@ -59,3 +59,7 @@ Advanced Regex Alert! This will exclude all files that DON'T match the regex for
 ## Credit
 
 Based on the [Netlify Search Index Plugin](https://github.com/sw-yx/netlify-plugin-search-index) by [swyx](https://github.com/sw-yx) for fetching and parsing the content into something we can index.
+
+## Contributing
+
+Make pull-requests, but follow [code of conduct](.github/CODE_OF_CONDUCT.md) please.
